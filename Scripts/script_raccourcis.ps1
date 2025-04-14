@@ -4,8 +4,8 @@ New-Item -ItemType Directory -Path $IconFolder -Force | Out-Null
 
 # Liste des raccourcis à créer
 $Shortcuts = @(
-    @{ Name = "Support Entreprise"; Url = "https://app.mailinblack.com/mibc-fr-05/user-space/spool/list"; IconUrl = "" },
-    @{ Name = "Intranet"; Url = "https://partnerinfo.sharepoint.com/sites/EspaceInfra"; IconUrl = "https://URL_TA_ICON_INTRANET.ico" }
+    @{ Name = "Mail In Black"; Url = "https://app.mailinblack.com/mibc-fr-05/user-space/spool/list"; IconUrl = "https://raw.githubusercontent.com/betasown/Internship/refs/heads/main/icon/logo_mailinblack.ico" },
+    @{ Name = "SharePoint"; Url = "https://partnerinfo.sharepoint.com/sites/EspaceInfra"; IconUrl = "https://raw.githubusercontent.com/betasown/Internship/refs/heads/main/icon/microsoft-sharepoint-2019.ico" }
 )
 
 $DesktopPath = "C:\Users\Public\Desktop"

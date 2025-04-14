@@ -1,0 +1,15 @@
+[
+    {
+      "toplevel_name": "Favoris Entreprise",
+      "children": [
+        {
+          "name": "Mail in black",
+          "url": "https://app.mailinblack.com/mibc-fr-05/home/login"
+        },
+        {
+          "name": "SharePoint",
+          "url": "https://partnerinfo.sharepoint.com/sites/EspaceInfra"
+        }
+      ]
+    }
+  ]
