@@ -1,6 +1,6 @@
-# Fond ecran - URL en ligne et en local
-$DesktopImageURL = "https://github.com/betasown/Internship/blob/main/images/Wallpaper.png?raw=true" # Lien vers l'image pour le bureau, hébergé sur un cloud 
-$LockscreenImageURL = "https://github.com/betasown/Internship/blob/main/images/Wallpaper.png?raw=true" # Lien vers l'image pour l'écran de verrouillage, hébergé sur un cloud 
+# Fond d'écran - URL en ligne
+$DesktopImageURL = "https://github.com/betasown/Internship/blob/main/images/Wallpaper.png?raw=true"
+$LockscreenImageURL = "https://github.com/betasown/Internship/blob/main/images/Wallpaper.png?raw=true"
 
 # Chemin local pour stocker les images
 $UserPicturesFolder = [Environment]::GetFolderPath("MyPictures")
@@ -14,19 +14,19 @@ if (!(Test-Path $ImageBankFolder)) {
 $DesktopLocalImage = Join-Path -Path $ImageBankFolder -ChildPath "Wallpaper.png"
 $LockscreenLocalImage = Join-Path -Path $ImageBankFolder -ChildPath "Lockscreen.png"
 
-# Registre - Chemin vers la cle (qui doit accueillir les valeurs)
-$RegKeyPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP"
-
 # Télécharger les images en local
 if (!(Test-Path $DesktopLocalImage)) {
-    Start-BitsTransfer -Source $DesktopImageURL -Destination $DesktopLocalImage
+    Invoke-WebRequest -Uri $DesktopImageURL -OutFile $DesktopLocalImage
 }
 
 if (!(Test-Path $LockscreenLocalImage)) {
-    Start-BitsTransfer -Source $LockscreenImageURL -Destination $LockscreenLocalImage
+    Invoke-WebRequest -Uri $LockscreenImageURL -OutFile $LockscreenLocalImage
 }
 
-# Modifier les clés de Registre (seulement si l'on parvient à accéder aux images en local)
+# Registre - Chemin vers la clé
+$RegKeyPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP"
+
+# Modifier les clés de Registre si les images existent
 if ((Test-Path $DesktopLocalImage) -and (Test-Path $LockscreenLocalImage)) {
 
     # Créer la clé PersonalizationCSP si elle n'existe pas
@@ -34,13 +34,24 @@ if ((Test-Path $DesktopLocalImage) -and (Test-Path $LockscreenLocalImage)) {
         New-Item -Path $RegKeyPath -Force | Out-Null
     }
 
-    # Registre Windows - Configurer l'image de fond d'écran (wallpaper)
+    # Configurer le fond d'écran
     New-ItemProperty -Path $RegKeyPath -Name DesktopImageStatus -Value 0 -PropertyType DWORD -Force | Out-Null
     New-ItemProperty -Path $RegKeyPath -Name DesktopImagePath -Value $DesktopLocalImage -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $RegKeyPath -Name DesktopImageUrl -Value $DesktopLocalImage -PropertyType String -Force | Out-Null
 
-    # Registre Windows - Configurer l'image de l'écran de verrouillage (lockscreen)
+    # Configurer l'écran de verrouillage
     New-ItemProperty -Path $RegKeyPath -Name LockScreenImageStatus -Value 0 -PropertyType DWORD -Force | Out-Null
     New-ItemProperty -Path $RegKeyPath -Name LockScreenImagePath -Value $LockscreenLocalImage -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $RegKeyPath -Name LockScreenImageUrl -Value $LockscreenLocalImage -PropertyType String -Force | Out-Null
+
+    # Forcer la mise à jour du fond d'écran sans redémarrage
+    Add-Type -TypeDefinition @"
+    using System;
+    using System.Runtime.InteropServices;
+    public class RefreshDesktop {
+        [DllImport("user32.dll")]
+        public static extern int SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
+    }
+"@
+    [RefreshDesktop]::SystemParametersInfo(20, 0, $DesktopLocalImage, 3)
 }
